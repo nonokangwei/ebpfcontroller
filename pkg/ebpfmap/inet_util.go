@@ -31,8 +31,8 @@ func IportAton(port string) uint16 {
 	}
 
 	var byteportInt []byte
-	byteportInt[1] = uint8(portInt)
-	byteportInt[0] = uint8(portInt >> 8)
+	byteportInt = append(byteportInt, uint8(portInt>>8))
+	byteportInt = append(byteportInt, uint8(portInt))
 
 	return binary.LittleEndian.Uint16(byteportInt)
 }
