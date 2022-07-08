@@ -42,7 +42,6 @@ func MacCopy(dest [6]byte, source net.HardwareAddr) {
 	for i := range dest {
 		dest[i] = source[i]
 	}
-	return
 }
 
 // MacString convert [6]uint8 to a string of mac address

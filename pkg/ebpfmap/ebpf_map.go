@@ -8,10 +8,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	maxEntries = 4096
-)
-
 var (
 	// ErrNoLoadPinnedMap represent pinned map isn't be loaded from userspace
 	ErrNoLoadPinnedMap error = errors.New("load pinned map from userspace before you use")
