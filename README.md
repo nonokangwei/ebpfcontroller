@@ -38,89 +38,90 @@ $ gcpregion=xxx
 $ gcpproject=yyy
 #### 1. Create the virtual private network
 create xdp front-end vpc
-
+```
 $ gcloud compute networks create nic1-vnet --project=$gcpproject --subnet-mode=custom --mtu=1460 --bgp-routing-mode=global
-
+```
 create xdp front-end subnet
-
+```
 $ gcloud compute networks subnets create nic1-subnet --project=$gcpproject --range=192.168.0.0/24 --stack-type=IPV4_ONLY --network=nic1-vnet --region=$gcpregion
-
+```
 create firewall policy to allow traffic on VPC front-end vpc
-
+```
 $ gcloud compute firewall-rules create nic1-vnet-allow-custom --project=$gcpproject --network=projects/$gcpproject/global/networks/nic1-vnet --description=Allows\ connection\ from\ any\ source\ to\ any\ instance\ on\ the\ network\ using\ custom\ protocols. --direction=INGRESS --priority=65534 --source-ranges=0.0.0.0/0 --action=ALLOW --rules=all
-
+```
 create xdp back-end vpc
-
+```
 $ gcloud compute networks create nic2-vnet --project=$gcpproject --subnet-mode=custom --mtu=1460 --bgp-routing-mode=global
-
+```
 create xdp back-end subnet
-
+```
 $ gcloud compute networks subnets create nic2-subnet --project=$gcpproject --range=192.168.1.0/24 --stack-type=IPV4_ONLY --network=nic2-vnet --region=$gcpregion
-
+```
 create firewall policy to allow traffic on VPC back-end vpc
-
+```
 $ gcloud compute firewall-rules create nic2-vnet-allow-custom --project=$gcpproject --network=projects/$gcpproject/global/networks/nic2-vnet --description=Allows\ connection\ from\ any\ source\ to\ any\ instance\ on\ the\ network\ using\ custom\ protocols. --direction=INGRESS --priority=65534 --source-ranges=0.0.0.0/0 --action=ALLOW --rules=all
+```
 #### 2. Create XDP Gateway and XDP Gateway instance group
 create XDP Gateway GCE instance
-
+```
 $ gcloud compute instances create xdp-gateway-instance1 --project=$gcpproject --zone=$gcpregion-a --machine-type=n2-standard-2 --network-interface=network-tier=PREMIUM,subnet=nic1-subnet --network-interface=subnet=nic2-subnet,no-address --metadata=enable-oslogin=true --can-ip-forward --maintenance-policy=MIGRATE --provisioning-model=STANDARD --create-disk=auto-delete=yes,boot=yes,device-name=xdp-gateway-instance1,image=projects/ubuntu-os-cloud/global/images/ubuntu-2004-focal-v20220712,mode=rw,size=10,type=projects/$gcpproject/zones/$gcpregion-a/diskTypes/pd-balanced --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
-
+```
 create XDP Gateway Instance Group
-
+```
 $ gcloud compute instance-groups unmanaged create xdp-gateway-instance-group --project=$gcpproject --zone=$gcpregion-a
-
+```
 Add XDP Gateway GCE intance to the Instance Group
-
+```
 $ gcloud compute instance-groups unmanaged add-instances xdp-gateway-instance-group --project=$gcpproject --zone=$gcpregion-a --instances=xdp-gateway-instance1
-
-
+```
 #### 3. Create Game Server and Game Server instance group
 create Game Server GCE instance
-
+```
 $ gcloud compute instances create game-server-instance1 --project=$gcpproject --zone=$gcpregion-a --machine-type=n2-standard-2 --network-interface=network-tier=PREMIUM,subnet=nic2-subnet --metadata=enable-oslogin=true --maintenance-policy=MIGRATE --provisioning-model=STANDARD --create-disk=auto-delete=yes,boot=yes,device-name=game-server-instance1,image=projects/ubuntu-os-cloud/global/images/ubuntu-2004-focal-v20220712,mode=rw,size=10,type=projects/project-kangwe-poc/zones/us-central1-a/diskTypes/pd-balanced --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
-
+```
 create Game Server Instance Group
-
+```
 $ gcloud compute instance-groups unmanaged create game-server-instance-group --project=$gcpproject --zone=$gcpregion-a
-
+```
 Add XDP Gateway GCE intance to the Instance Group
-
+```
 $ gcloud compute instance-groups unmanaged add-instances game-server-instance-group --project=$gcpproject --zone=$gcpregion-a --instances=game-server-instance1
+```
 #### 4. Create Cloud Network Load Balancer, XDP Gateway Instance Group as Active Backend, Game Server Instance Group as Failover Backend.
 create Cloud Load Balancer Public IP
-
+```
 $ gcloud compute addresses create xdp-network-lb-ip --region $gcpregion
-
+```
 create Cloud Load Balancer Health Check Policy
-
+```
 $ gcloud compute health-checks create tcp hc-tcp-22 --region $gcpregion --port 22
-
+```
 create Cloud Load Balancer backend service
-
+```
 $ gcloud compute backend-services create xdp-network-lb-backend-service \
     --protocol udp \
     --region $gcpregion \
     --health-checks hc-tcp-22 \
     --health-checks-region $gcpregion \
     --failover-ratio 0
-
+```
 add XDP Gateway Instance Group to the Cloud Load Balancer's backend service
-
+```
 $ gcloud compute backend-services add-backend xdp-network-lb-backend-service \
     --region $gcpregion \
     --instance-group xdp-gateway-instance-group \
     --instance-group-zone $gcpregion-a
-
+```
 add Game Server Instance Group to the Cloud Load Balancer's backend service as Failover Group
-
+```
 $ gcloud compute backend-services add-backend xdp-network-lb-backend-service \
     --region $gcpregion \
     --instance-group game-server-instance-group \
     --instance-group-zone $gcpregion-a \
     --failover
-
+```
 create Cloud Load Balancer forwarding rule
-
+```
 $ gcloud compute forwarding-rules create xdp-network-lb-forwarding-rule \
     --region $gcpregion \
     --load-balancing-scheme external \
@@ -128,7 +129,7 @@ $ gcloud compute forwarding-rules create xdp-network-lb-forwarding-rule \
     --ports ALL \
     --ip-protocol UDP \
     --backend-service xdp-network-lb-backend-service
-
+```
 ### Deploy the XDP eBPF program on XDP Gateway Instance
 
 ### Deploy the XDP eBPF controller program on XDP Gateway Instance
