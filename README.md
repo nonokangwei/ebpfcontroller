@@ -147,7 +147,13 @@ $ sudo apt install linux-tools-common linux-tools-generic tcpdump
 ```
 clone code to the XDP Gateway Instance
 ```
-
+$ git clone https://github.com/nonokangwei/ebpfcontroller.git
+$ git clone --recurse-submodules https://github.com/xdp-project/xdp-tutorial
+```
+copy the ebpf code to the xdp project folder
+```
+$ cp ./ebpfcontroller/ebpf/xdp_prog_kern.c ./xdp-tutorial/packet03-redirecting/
+$ cp ./ebpfcontroller/ebpf/parsing_helpers.h ./xdp-tutorial/common/
 ```
 ### Deploy the XDP eBPF controller program on XDP Gateway Instance
 
