@@ -36,6 +36,7 @@ The solution is using scale-out model to achieve high performance, the XDP Gatew
 $ gcpregion=xxx
 
 $ gcpproject=yyy
+
 #### 1. Create the virtual private network
 create xdp front-end vpc
 ```
@@ -61,6 +62,7 @@ create firewall policy to allow traffic on VPC back-end vpc
 ```
 $ gcloud compute firewall-rules create nic2-vnet-allow-custom --project=$gcpproject --network=projects/$gcpproject/global/networks/nic2-vnet --description=Allows\ connection\ from\ any\ source\ to\ any\ instance\ on\ the\ network\ using\ custom\ protocols. --direction=INGRESS --priority=65534 --source-ranges=0.0.0.0/0 --action=ALLOW --rules=all
 ```
+
 #### 2. Create XDP Gateway and XDP Gateway instance group
 create XDP Gateway GCE instance
 ```
@@ -74,6 +76,7 @@ Add XDP Gateway GCE intance to the Instance Group
 ```
 $ gcloud compute instance-groups unmanaged add-instances xdp-gateway-instance-group --project=$gcpproject --zone=$gcpregion-a --instances=xdp-gateway-instance1
 ```
+
 #### 3. Create Game Server and Game Server instance group
 create Game Server GCE instance
 ```
@@ -87,6 +90,7 @@ Add XDP Gateway GCE intance to the Instance Group
 ```
 $ gcloud compute instance-groups unmanaged add-instances game-server-instance-group --project=$gcpproject --zone=$gcpregion-a --instances=game-server-instance1
 ```
+
 #### 4. Create Cloud Network Load Balancer, XDP Gateway Instance Group as Active Backend, Game Server Instance Group as Failover Backend.
 create Cloud Load Balancer Public IP
 ```
@@ -130,6 +134,7 @@ $ gcloud compute forwarding-rules create xdp-network-lb-forwarding-rule \
     --ip-protocol UDP \
     --backend-service xdp-network-lb-backend-service
 ```
+
 ### Deploy the XDP eBPF program on XDP Gateway Instance
 This Repo is using Ubuntu as the OS image, all the step-by-step guide is for Ubuntu. For other OS platform, please refer the guide [here](https://github.com/xdp-project/xdp-tutorial/blob/master/setup_dependencies.org#setup-dependencies)
 
@@ -144,6 +149,12 @@ $ sudo apt install linux-headers-$(uname -r)
 install common tools package
 ```
 $ sudo apt install linux-tools-common linux-tools-generic tcpdump
+```
+install go
+```
+$ wget https://go.dev/dl/go1.18.3.linux-amd64.tar.gz
+$ rm -rf /usr/local/go && tar -C /usr/local -xzf go1.18.3.linux-amd64.tar.gz
+$ export PATH=$PATH:/usr/local/go/bin
 ```
 clone code to the XDP Gateway Instance
 ```
@@ -168,16 +179,10 @@ $ ./xdp_prog_user -d ens4 -r ens5  --src-mac 42:01:c0:a8:00:01 --dest-mac 42:01:
 ```
 stop the XDP ebpf program
 ```
-$
+$ ./xdp_loader --dev ens4 --force --unload true --progsec xdp_patch_ports --skb-mode
 ```
 
 ### Deploy the XDP eBPF controller program on XDP Gateway Instance
-install go
-```
-$ wget https://go.dev/dl/go1.18.3.linux-amd64.tar.gz
-$ rm -rf /usr/local/go && tar -C /usr/local -xzf go1.18.3.linux-amd64.tar.gz
-$ export PATH=$PATH:/usr/local/go/bin
-```
 build the XDP eBPF controller code
 ```
 $ cd /ebpfcontroller
@@ -191,6 +196,7 @@ check the fingerpirnt forwarding table
 ```
 $ go run . -action list 
 ```
+
 ### Connectivity Test with NC tool
 check the connectivity with NC tool, replace the sourceip and nlbip to your environment ip.
 ```
@@ -200,4 +206,9 @@ $ aaaaaaaaaa
 login to the GameServer instance
 ```
 $ nc -u -l 192.168.1.3
+```
+check the counter on XDP Gateway instance
+```
+$ cd ./xdp-tutorial/packet03-redirecting
+$ ./xdp_stats -d ens4
 ```
