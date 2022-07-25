@@ -103,7 +103,7 @@ func parseFlag() *server {
 	apiAddr := flag.String("apiaddress", ":9091", "Listen address of api server")
 	gameserverAddr := flag.String("gsaddress", "0.0.0.0", "Listen address of game server")
 	gameserverPort := flag.String("gsport", "0", "Listen port of game server")
-	mapName := flag.String("map", "/sys/fs/bpf/ens5/forward_params", "name of ebpf map")
+	mapName := flag.String("map", "/sys/fs/bpf/ens4/forward_params", "name of ebpf map")
 	ctlAction := flag.String("action", "runapi", "insert: insert map entry, batchinsert: batch insert 4K entries, delete: delete all map entries, list: list all map entries")
 	fingerprintToken := flag.String("token", "6161616161616161", "token encode in HEX byte")
 	flag.Parse()

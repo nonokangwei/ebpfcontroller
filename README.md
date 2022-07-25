@@ -154,7 +154,50 @@ copy the ebpf code to the xdp project folder
 ```
 $ cp ./ebpfcontroller/ebpf/xdp_prog_kern.c ./xdp-tutorial/packet03-redirecting/
 $ cp ./ebpfcontroller/ebpf/parsing_helpers.h ./xdp-tutorial/common/
+$ cp ./xdp-tutorial/packet-solutions/xdp_prog_user.c ./xdp-tutorial/packet03-redirecting/
 ```
-### Deploy the XDP eBPF controller program on XDP Gateway Instance
+compile xdp ebpf code
+```
+$ cd xdp-tutorial/packet03-redirecting/
+$ make
+```
+init XDP ebpf program
+```
+$ ./xdp_loader --dev ens4 --force  --progsec xdp_patch_ports --skb-mode
+$ ./xdp_prog_user -d ens4 -r ens5  --src-mac 42:01:c0:a8:00:01 --dest-mac 42:01:c0:a8:01:01
+```
+stop the XDP ebpf program
+```
+$
+```
 
+### Deploy the XDP eBPF controller program on XDP Gateway Instance
+install go
+```
+$ wget https://go.dev/dl/go1.18.3.linux-amd64.tar.gz
+$ rm -rf /usr/local/go && tar -C /usr/local -xzf go1.18.3.linux-amd64.tar.gz
+$ export PATH=$PATH:/usr/local/go/bin
+```
+build the XDP eBPF controller code
+```
+$ cd /ebpfcontroller
+$ go build .
+```
+insert a sample fingerprint routing entry(0x6262626262626262, 192.168.1.3), fingerpirnt token//0x6262626262626262 forwarding to GameServer 192.168.1.3
+```
+$ go run . -action insert -gsaddress 192.168.1.3
+```
+check the fingerpirnt forwarding table
+```
+$ go run . -action list 
+```
 ### Connectivity Test with NC tool
+check the connectivity with NC tool, replace the sourceip and nlbip to your environment ip.
+```
+$ nc -u -s $sourceip $nlbip 12345
+$ aaaaaaaaaa
+```
+login to the GameServer instance
+```
+$ nc -u -l 192.168.1.3
+```
