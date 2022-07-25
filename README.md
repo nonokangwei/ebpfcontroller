@@ -8,6 +8,10 @@ An step by step guide to build up a high performance UDP fingerprint filter solu
   * [Architecture](#solution-architecture)
   * [Design Consideration](#design-consideration)
 * [Get Started](#get-started)
+  * [Prepare the Google Cloud environment](#prepare-the-google-cloud-environment)
+  * [Deploy the XDP eBPF program on XDP Gateway Instance](#deploy-the-xdp-ebpf-program-on-xdp-gateway-instance)
+  * [Deploy the XDP eBPF controller program on XDP Gateway Instance](#deploy-the-xdp-ebpf-controller-program-on-xdp-gateway-instance)
+  * [Connectivity Test with NC tool](#connectivity-test-with-nc-tool)
 ## Overview
 Some game genres has low latency request, so game developer has started build up game transport stack based on UDP protocol. UDP is stateless transport protocal which is vulnerable to DDoS attack. When the Game server under attack, it will exhaust all the resource of the server, then all the users serve on it will be impacted. In the industry UDP DDoS protection is hot topic, one of the effective method is token authorization, game delveloper embed authorized access token in UDP payload, anti-DDoS facility will check the token and drop the packet with unauthorized token. Some Cloud Vendor/CDN Vendor has provided this capability on its network security product. When Build self performance is a key blocker, [eBPF XDP](https://docs.cilium.io/en/stable/concepts/ebpf/intro/) is a good candidate to work as token filter with high performance. This repo target is to help you getting start to build up a eBPF XDP based UDP filter Solution on GCP(Google Cloud Platform), you can also folk this architucture on other environment.  
 
