@@ -131,7 +131,24 @@ $ gcloud compute forwarding-rules create xdp-network-lb-forwarding-rule \
     --backend-service xdp-network-lb-backend-service
 ```
 ### Deploy the XDP eBPF program on XDP Gateway Instance
+This Repo is using Ubuntu as the OS image, all the step-by-step guide is for Ubuntu. For other OS platform, please refer the guide [here](https://github.com/xdp-project/xdp-tutorial/blob/master/setup_dependencies.org#setup-dependencies)
 
+install the dependencies on Ubuntu
+```
+$ sudo apt install clang llvm libelf-dev libpcap-dev gcc-multilib build-essential linux-tools-$(uname -r)
+```
+install Kernel headers dependency
+```
+$ sudo apt install linux-headers-$(uname -r)
+```
+install common tools package
+```
+$ sudo apt install linux-tools-common linux-tools-generic tcpdump
+```
+clone code to the XDP Gateway Instance
+```
+
+```
 ### Deploy the XDP eBPF controller program on XDP Gateway Instance
 
 ### Connectivity Test with NC tool
